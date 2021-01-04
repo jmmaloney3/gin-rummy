@@ -125,12 +125,13 @@ class CardCounterTests {
         drawnCard = ev.deck.pop();
         ev.opHand.add(drawnCard);
         ev.opRejects.add(ev.discardPile.peek());
-        counter.reportDraw(ev.opNum, drawnCard);
+        counter.reportDraw(ev.opNum, null); // agent doesn't sees opponent's card
         compare(ev, counter);
 
         // opponent discards a card
         discard = ev.opHand.iterator().next();
         ev.opHand.remove(discard);
+        ev.opKnownHand.remove(discard);
         ev.opRejects.add(discard);
         ev.discardPile.push(discard);
         counter.reportDiscard(ev.opNum, discard);
@@ -153,12 +154,14 @@ class CardCounterTests {
         // opponent draws a card from discard pile
         drawnCard = ev.discardPile.pop();
         ev.opHand.add(drawnCard);
-        counter.reportDraw(ev.opNum, drawnCard);
+        ev.opKnownHand.add(drawnCard);
+        counter.reportDraw(ev.opNum, drawnCard);  // agent sees opponent's card
         compare(ev, counter);
 
         // opponent discards a card
         discard = ev.opHand.iterator().next();
         ev.opHand.remove(discard);
+        ev.opKnownHand.remove(discard);
         ev.opRejects.add(discard);
         ev.discardPile.push(discard);
         counter.reportDiscard(ev.opNum, discard);

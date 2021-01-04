@@ -10,7 +10,7 @@ import eaai.ginrummy.Card;
 
 /**
  * Provides functionality to count cards in a game of Gin Rummy to provide
- * information that an agent can use to make decisoons during the game.
+ * information that an agent can use to make decisons during the game.
  */
 public class CardCounter {
 
@@ -76,7 +76,7 @@ public class CardCounter {
         if (this.isMe(playerNum)) {
             this.myHand.add(drawnCard);
         }
-        else if (drawnCard == null) { // opponent
+        else if (drawnCard != null) { // opponent
             this.opKnownHand.add(drawnCard);
         }
     }
