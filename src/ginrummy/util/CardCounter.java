@@ -27,6 +27,7 @@ public class CardCounter {
     // instance variable for tracking discard and draw piles
     private Stack<Card> discardPile;
     private int drawPileSize;        // number of cards remaining in draw pile
+    private Set<Card> unseenCards;   // cards in draw pile and unknown cards in opponent's hand
 
     /**
      * Reset the state of this card counter to prepare for a new game.
@@ -34,7 +35,7 @@ public class CardCounter {
     public void reset(int playerNum, Set<Card> hand) {
         // initialize state for this agent
         this.myNumber = playerNum;
-        this.myHand = hand;
+        this.myHand = new HashSet<Card>(hand);
         this.myRejects = new HashSet<Card>();
 
         // initialize state for opponent
@@ -45,6 +46,12 @@ public class CardCounter {
         // initialize piles
         this.discardPile = new Stack<Card>();
         this.drawPileSize = Card.NUM_CARDS - 2*Utils.HAND_SIZE;
+        this.unseenCards = new HashSet<Card>();
+        for (int i = 0; i < Card.NUM_CARDS; i++) {
+            if (!this.myHand.contains(Card.allCards[i])) {
+                this.unseenCards.add(Card.allCards[i]);
+            }
+        }
     }
 
     /**
@@ -59,6 +66,9 @@ public class CardCounter {
 
             // push card onto discard pile
             this.discardPile.push(faceUpCard);
+
+            // remove card from unseen cards
+            this.unseenCards.remove(faceUpCard);
         }
         else {
             throw new java.lang.UnsupportedOperationException("This isn't the first face up card: " + faceUpCard);
@@ -96,6 +106,7 @@ public class CardCounter {
         else { // opponent discarded
             this.opRejects.add(discardedCard);
             this.opKnownHand.remove(discardedCard);
+            this.unseenCards.remove(discardedCard);
         }
     }
 
@@ -142,6 +153,13 @@ public class CardCounter {
         return this.drawPileSize;
     }
 
+    /**
+     * Get an unmodifiable view of the unseen cards.
+     */
+    public Set<Card> getUnseenCards() {
+        return Collections.unmodifiableSet(this.unseenCards);
+    }
+
     // private utility methods
     private boolean isMe(int playerNum) {
         return (this.myNumber == playerNum);
@@ -155,10 +173,14 @@ public class CardCounter {
 
     /**
      * If the drawn card is the face up card then update the discard pile.  Otherwise,
-     * update the set of rejected cards for the appropriate agent and the number
-     * of cards remaining in the draw pile.
+     * update the set of rejected cards for the appropriate agent, the number
+     * of cards remaining in the draw pile and the unseen cards.
      */
     private void updatePilesAndRejects(int playerNum, Card drawnCard) {
+        if (drawnCard != null) {
+            // since the agent has seen the drawn card, remove it from the unseen cards
+            this.unseenCards.remove(drawnCard);
+        }
         if (this.isFaceUpCard(drawnCard)) {
             // card was drawn from face up discard pile
              this.discardPile.pop();

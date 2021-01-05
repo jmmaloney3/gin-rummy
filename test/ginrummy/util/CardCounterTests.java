@@ -27,6 +27,7 @@ class CardCounterTests {
     private class ExpectedValues {
         public final Stack<Card> deck = Card.getShuffle(RANDOM.nextInt());
         public final Stack<Card> discardPile = new Stack<Card>();
+        public final Set<Card> unseenCards = new HashSet<Card>(deck);
         public final Set<Card> myHand = getHand(deck);
         public final Set<Card> myRejects = new HashSet<Card>();
         public final Set<Card> opHand = getHand(deck);
@@ -34,6 +35,13 @@ class CardCounterTests {
         public final Set<Card> opRejects = new HashSet<Card>();
         public final int myNum = (RANDOM.nextInt() % 2);
         public final int opNum = (myNum + 1) % 2;
+
+        ExpectedValues() {
+            // remove my hand from the unseen cards
+            for (Card c : this.myHand) {
+                this.unseenCards.remove(c);
+            }
+        }
     }
 
     /**
@@ -59,6 +67,7 @@ class CardCounterTests {
         compare(ev.opKnownHand, counter.getOpKnownHand(), "Op Known Hand");
         compare(ev.opRejects, counter.getOpRejects(), "Op Rejects");
         compare(ev.discardPile, counter.getDiscardPile(), "Discard Pile");
+        compare(ev.unseenCards, counter.getUnseenCards(), "Unseen Cards");
     }
 
     /**
@@ -103,6 +112,7 @@ class CardCounterTests {
         // add first face up card to discard pile
         Card drawnCard = ev.deck.pop();
         ev.discardPile.push(drawnCard);
+        ev.unseenCards.remove(drawnCard);
         counter.reportFirstFaceUpCard(drawnCard);
         compare(ev, counter);
 
@@ -110,6 +120,7 @@ class CardCounterTests {
         drawnCard = ev.deck.pop();
         ev.myHand.add(drawnCard);
         ev.myRejects.add(ev.discardPile.peek());
+        ev.unseenCards.remove(drawnCard);
         counter.reportDraw(ev.myNum, drawnCard);
         compare(ev, counter);
 
@@ -133,6 +144,7 @@ class CardCounterTests {
         ev.opHand.remove(discard);
         ev.opKnownHand.remove(discard);
         ev.opRejects.add(discard);
+        ev.unseenCards.remove(discard);
         ev.discardPile.push(discard);
         counter.reportDiscard(ev.opNum, discard);
         compare(ev, counter);
@@ -140,6 +152,7 @@ class CardCounterTests {
         // agent draws a card from discard pile
         drawnCard = ev.discardPile.pop();
         ev.myHand.add(drawnCard);
+        ev.unseenCards.remove(drawnCard);
         counter.reportDraw(ev.myNum, drawnCard);
         compare(ev, counter);
 
@@ -164,6 +177,7 @@ class CardCounterTests {
         ev.opKnownHand.remove(discard);
         ev.opRejects.add(discard);
         ev.discardPile.push(discard);
+        ev.unseenCards.remove(discard);
         counter.reportDiscard(ev.opNum, discard);
         compare(ev, counter);
 
