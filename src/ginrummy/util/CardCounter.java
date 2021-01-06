@@ -154,6 +154,19 @@ public class CardCounter {
     }
 
     /**
+     * Return a display string for the card counter.
+     */
+    public String toString() {
+        return "<" + getClass().getName() + "\n" +
+        "  myHand:       " + this.myHand + "\n" +
+        "  myRejects:    " + this.myRejects + "\n" +
+        "  opKnownHand:  " + this.opKnownHand + "\n" +
+        "  opRejects:    " + this.opRejects + "\n" +
+        "  discardPile:  " + this.discardPile + "\n" +
+        "  drawPileSize: " + this.drawPileSize + "\n>";
+    }
+
+    /**
      * Get an unmodifiable view of the unseen cards.
      */
     public Set<Card> getUnseenCards() {
