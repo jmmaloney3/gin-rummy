@@ -30,6 +30,7 @@ class CardCounterTests {
         public final Set<Card> unseenCards = new HashSet<Card>(deck);
         public final Set<Card> myHand = getHand(deck);
         public final Set<Card> myRejects = new HashSet<Card>();
+        public final Set<Card> myKnownHand = new HashSet<Card>();
         public final Set<Card> opHand = getHand(deck);
         public final Set<Card> opKnownHand = new HashSet<Card>();
         public final Set<Card> opRejects = new HashSet<Card>();
@@ -64,6 +65,7 @@ class CardCounterTests {
         assertEquals(ev.deck.size(), counter.getDrawPileSize(), "Draw Pile: different sizes");
         compare(ev.myHand, counter.getMyHand(), "My Hand");
         compare(ev.myRejects, counter.getMyRejects(), "My Rejects");
+        compare(ev.myKnownHand, counter.getMyKnownHand(), "My Known Hand");
         compare(ev.opKnownHand, counter.getOpKnownHand(), "Op Known Hand");
         compare(ev.opRejects, counter.getOpRejects(), "Op Rejects");
         compare(ev.discardPile, counter.getDiscardPile(), "Discard Pile");
@@ -152,6 +154,7 @@ class CardCounterTests {
         // agent draws a card from discard pile
         drawnCard = ev.discardPile.pop();
         ev.myHand.add(drawnCard);
+        ev.myKnownHand.add(drawnCard);
         ev.unseenCards.remove(drawnCard);
         counter.reportDraw(ev.myNum, drawnCard);
         compare(ev, counter);
@@ -159,6 +162,7 @@ class CardCounterTests {
         // agent discards a card
         discard = ev.myHand.iterator().next();
         ev.myHand.remove(discard);
+        ev.myKnownHand.remove(discard);
         ev.myRejects.add(discard);
         ev.discardPile.push(discard);
         counter.reportDiscard(ev.myNum, discard);

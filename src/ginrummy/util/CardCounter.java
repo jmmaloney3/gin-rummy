@@ -18,6 +18,7 @@ public class CardCounter {
     private int myNumber;            // this agent's player number
     private Set<Card> myHand;        // this agent's current hand
     private Set<Card> myRejects;     // cards this agent has discarded or passed over
+    private Set<Card> myKnownHand;   // cards opponent knows are in my hand
     
     // private instance variables for tracking opponent state
     private int opNumber;            // opponent's player number
@@ -37,6 +38,7 @@ public class CardCounter {
         this.myNumber = playerNum;
         this.myHand = new HashSet<Card>(hand);
         this.myRejects = new HashSet<Card>();
+        this.myKnownHand = new HashSet<Card>();
 
         // initialize state for opponent
         this.opNumber = (playerNum + 1) % 2;
@@ -102,6 +104,7 @@ public class CardCounter {
         if (this.isMe(playerNum)) { // this agent discarded
             this.myRejects.add(discardedCard);
             this.myHand.remove(discardedCard);
+            this.myKnownHand.remove(discardedCard);
         }
         else { // opponent discarded
             this.opRejects.add(discardedCard);
@@ -123,6 +126,13 @@ public class CardCounter {
      */
     public Set<Card> getOpKnownHand() {
         return Collections.unmodifiableSet(this.opKnownHand);
+    }
+
+    /**
+     * Get an unmodifiable view of my known hand.
+     */
+    public Set<Card> getMyKnownHand() {
+        return Collections.unmodifiableSet(this.myKnownHand);
     }
 
     /**
@@ -160,6 +170,7 @@ public class CardCounter {
         return "<" + getClass().getName() + "\n" +
         "  myHand:       " + this.myHand + "\n" +
         "  myRejects:    " + this.myRejects + "\n" +
+        "  myKnownHand:  " + this.myKnownHand + "\n" +
         "  opKnownHand:  " + this.opKnownHand + "\n" +
         "  opRejects:    " + this.opRejects + "\n" +
         "  discardPile:  " + this.discardPile + "\n" +
@@ -197,6 +208,10 @@ public class CardCounter {
         if (this.isFaceUpCard(drawnCard)) {
             // card was drawn from face up discard pile
              this.discardPile.pop();
+             if (this.isMe(playerNum)) {
+                 // opponent knows what card was drawn
+                 this.myKnownHand.add(drawnCard);
+             }
         }
         else {
             // card was drawn from face down draw pile
