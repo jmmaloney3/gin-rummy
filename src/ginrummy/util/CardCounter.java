@@ -82,14 +82,44 @@ public class CardCounter {
      * player.
      */
     public void reportDraw(int playerNum, Card drawnCard) {
-        // update discard pile, draw pile size and rejects
-        this.updatePilesAndRejects(playerNum, drawnCard);
         // update "active" agent hand
         if (this.isMe(playerNum)) {
             this.myHand.add(drawnCard);
         }
         else if (drawnCard != null) { // opponent
             this.opKnownHand.add(drawnCard);
+        }
+
+        // update list of unseen cards if necessary
+        if (drawnCard != null) {
+            // since the agent has seen the drawn card, remove it from the unseen cards
+            this.unseenCards.remove(drawnCard);
+        }
+
+        // update discard pile, my known hand, draw pile size and rejects
+        if (this.isFaceUpCard(drawnCard)) {
+            // card was drawn from face up discard pile
+             this.discardPile.pop();
+            if (this.isMe(playerNum)) {
+                 // opponent knows what card was drawn
+                this.myKnownHand.add(drawnCard);
+            }
+        }
+        else {
+            // card was drawn from face down draw pile
+
+            // decrement draw card pile size
+            this.drawPileSize--;
+
+            // update rejects
+            if (!this.discardPile.isEmpty()) {
+                if (this.isMe(playerNum)) { // this agent rejected the face up card
+                    this.myRejects.add(this.discardPile.peek());
+                }
+                else { // opponent rejected the face up card
+                    this.opRejects.add(this.discardPile.peek());
+                }
+            }
         }
     }
 
@@ -193,41 +223,5 @@ public class CardCounter {
         return (!this.discardPile.isEmpty() &&
                 (card != null) && 
                 card.equals(this.discardPile.peek()));
-    }
-
-    /**
-     * If the drawn card is the face up card then update the discard pile.  Otherwise,
-     * update the set of rejected cards for the appropriate agent, the number
-     * of cards remaining in the draw pile and the unseen cards.
-     */
-    private void updatePilesAndRejects(int playerNum, Card drawnCard) {
-        if (drawnCard != null) {
-            // since the agent has seen the drawn card, remove it from the unseen cards
-            this.unseenCards.remove(drawnCard);
-        }
-        if (this.isFaceUpCard(drawnCard)) {
-            // card was drawn from face up discard pile
-             this.discardPile.pop();
-             if (this.isMe(playerNum)) {
-                 // opponent knows what card was drawn
-                 this.myKnownHand.add(drawnCard);
-             }
-        }
-        else {
-            // card was drawn from face down draw pile
-
-            // decrement draw card pile size
-            this.drawPileSize--;
-
-            // update rejects
-            if (!this.discardPile.isEmpty()) {
-                if (this.isMe(playerNum)) { // this agent rejected the face up card
-                    this.myRejects.add(this.discardPile.peek());
-                }
-                else { // opponent rejected the face up card
-                    this.opRejects.add(this.discardPile.peek());
-                }
-            }
-        }
     }
 }
